@@ -30,6 +30,7 @@ python main.py
 
 ## 📁 项目结构
 
+```
 wwpy/
     ├── wicked-waifus-rs/     # 项目源码
     ├── release/              # 构建目录
@@ -52,6 +53,7 @@ wwpy/
     ├───── uninstall.py     # 卸载脚本
     ├───── requirements.txt # Py依赖库
     └── Readme.md             # 说明文档
+```
 
 > 构建项目时源码本身问题导致的错误将显示 [Info] ，不会输出到错误日志文件中。
 
