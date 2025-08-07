@@ -136,5 +136,7 @@ wwpy/
 - **服务端源码**: https://git.xeondev.com/wickedwaifus/wicked-waifus-rs
 
 > 在wicked-waifus-rs\wicked-waifus-hotpatch-server\src\main.rs第31行，路由路径定义为 "/:env:/client/:hash:/:platform:/config.json" ，这里使用了旧版本的路由语法（以冒号开头的路径参数）。新版本的axum路由器要求使用花括号格式,需要修复这个路由定义为 "/{env}/client/{hash}/{platform}/config.json"。
+
 > 2.5版本期间，如果您缺少时间，完整克隆本脚本项目即可，其中的源码已经修复完成。
+
 > 2.5版本之后，如果hotpatch-server仍然闪退，可能需要等待上游修复或您手动修改源码中的路由配置。
