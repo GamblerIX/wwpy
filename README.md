@@ -35,24 +35,24 @@ wwpy/
     ├── wicked-waifus-rs/     # 项目源码
     ├── release/              # 构建目录
     ├── logs/                 # 日志目录
-        ├── git.log           # 下载日志
-        ├── build.log         # 构建日志
-        ├── run.log           # 运行日志
-        ├── status.log        # 监控日志
-        ├── logs.log          # 完整日志
-        ├── error.log         # 错误日志
-        ├── main.log          # 主程序日志
+    ├───── git.log          # 下载日志
+    ├───── build.log        # 构建日志
+    ├───── run.log          # 运行日志
+    ├───── status.log       # 监控日志
+    ├───── logs.log         # 完整日志
+    ├───── error.log        # 错误日志
+    ├───── main.log         # 主程序日志
     └── temp/                 # 临时目录
     ├── py/                   # 脚本目录
-        ├── git.py            # 下载脚本
-        ├── main.py           # 入口脚本
-        ├── build.py          # 构建脚本
-        ├── run.py            # 运行脚本
-        ├── status.py         # 监控脚本
-        ├── logs.py           # 日志脚本
-        ├── uninstall.py      # 卸载脚本
-        ├── requirements.txt  # Py依赖库
-    ├── Readme.md             # 说明文档
+    ├───── git.py           # 下载脚本
+    ├───── main.py          # 入口脚本
+    ├───── build.py         # 构建脚本
+    ├───── run.py           # 运行脚本
+    ├───── status.py        # 监控脚本
+    ├───── logs.py          # 日志脚本
+    ├───── uninstall.py     # 卸载脚本
+    ├───── requirements.txt # Py依赖库
+    └── Readme.md             # 说明文档
 ```
 > 构建项目时源码本身问题导致的错误将显示 [Info] ，不会输出到错误日志文件中。
 
