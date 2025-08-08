@@ -32,7 +32,7 @@ python main.py
 
 ```
 wwpy/
-    ├── wicked-waifus-rs/   # 项目源码
+    ├── wicked-waifus-rs/   # 项目源码（需要通过脚本下载）
     ├── release/            # 构建目录
     ├── logs/               # 日志目录
     ├───── git.log          # 下载日志
@@ -140,7 +140,7 @@ wwpy/
 > 在wicked-waifus-rs\wicked-waifus-hotpatch-server\src\main.rs第31行，路由路径定义为 "/:env:/client/:hash:/:platform:/config.json" ，这里使用了旧版本的路由语法（以冒号开头的路径参数）。新版本的axum路由器要求使用花括号格式，需要修复这个路由定义为 "/{env}/client/{hash}/{platform}/config.json"。
 > 请您在git源码后手动修改源码中的路由配置。
 
-> 上游问题，wicked-waifus-proto仓库自2025.8.8消失（2025.8.7仍然可用），静待上游修复。（本人没有备份相关文件）
+> 上游问题，wicked-waifus-proto仓库自2025.8.8消失（2025.8.7仍然可用），静待上游修复。（作者没有备份相关文件，包括已编译版本）
 > 未修复前会出现以下报错：
 >     Updating git repository `https://git.xeondev.com/wickedwaifus/wicked-waifus-proto`
 > error: failed to get `wicked-waifus-protocol` as a dependency of package `wicked-waifus-gateway-server v0.1.0 (C:\Users\Administrator\Downloads\wicked-waifus-rs-main\wicked-waifus-gateway-server)`
