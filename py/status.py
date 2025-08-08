@@ -91,7 +91,7 @@ class WuWaStatus:
             # 如果无法获取网络连接信息，尝试socket连接
             try:
                 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                    s.settimeout(0.5)  # 减少超时时间从1秒到0.5秒
+                    s.settimeout(0.1)  # 进一步减少超时时间到0.1秒
                     result = s.connect_ex(('127.0.0.1', port))
                     if result == 0:
                         return {
@@ -370,7 +370,7 @@ class WuWaStatus:
             else:
                 print(f"  {log_file:20} | {'不存在':>6} | {'':19}")
                 
-    def monitor_continuously(self, interval=30):
+    def monitor_continuously(self, interval=10):
         """持续监控模式"""
         self.monitoring = True
         self.monitor_event.clear()

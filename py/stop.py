@@ -166,6 +166,14 @@ class WuWaStop:
         """停止所有服务端"""
         self.log_message("=== 开始停止所有服务端 ===")
         
+        # 创建停止标志文件，防止自动重启
+        stop_flag_file = self.project_root / "stop_flag.tmp"
+        try:
+            stop_flag_file.touch()
+            self.log_message("✅ 已创建停止标志文件，禁用自动重启")
+        except Exception as e:
+            self.log_message(f"⚠️  创建停止标志文件失败: {e}", "WARNING")
+        
         total_stopped = 0
         
         # 如果没有传入运行中的服务端列表，则重新检查
@@ -206,6 +214,14 @@ class WuWaStop:
         else:
             self.log_message("ℹ️  没有找到运行中的服务端进程")
             
+        # 清理停止标志文件
+        try:
+            if stop_flag_file.exists():
+                stop_flag_file.unlink()
+                self.log_message("✅ 已清理停止标志文件")
+        except Exception as e:
+            self.log_message(f"⚠️  清理停止标志文件失败: {e}", "WARNING")
+        
         self.log_message("=== 服务端停止完成 ===")
         return total_stopped > 0
         

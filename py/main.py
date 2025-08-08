@@ -154,7 +154,6 @@ class WuWaManager:
     def handle_run(self):
         """处理运行服务端"""
         print("\n=== 运行服务端 ===")
-        self.show_server_info()
         
         try:
             print("\n正在启动服务端...")
@@ -264,22 +263,25 @@ class WuWaManager:
         """处理停止服务端"""
         print("\n=== 停止服务端 ===")
         try:
-            # 显示当前运行的服务端
-            running_servers = self.stopper.show_running_servers()
-            
-            if running_servers:
-                # 询问是否停止
-                confirm = input("\n是否停止所有运行中的服务端？(Y/n): ").strip().lower()
-                if confirm in ['', 'y', 'yes']:
-                    success = self.stopper.stop_all_servers()
-                    if success:
-                        print("✅ 服务端停止完成")
-                    else:
-                        print("ℹ️  没有找到运行中的服务端")
+            # 直接询问是否停止（优化流程）
+            confirm = input("是否停止所有运行中的服务端？(Y/n): ").strip().lower()
+            if confirm in ['', 'y', 'yes']:
+                # 先停止服务端
+                success = self.stopper.stop_all_servers()
+                
+                # 停止后再检查状态
+                print("\n正在检查停止结果...")
+                time.sleep(1)  # 短暂等待确保进程完全停止
+                running_servers = self.stopper.show_running_servers()
+                
+                if not running_servers:
+                    print("✅ 所有服务端已成功停止")
                 else:
-                    print("取消停止操作")
+                    print(f"⚠️  仍有 {len(running_servers)} 个服务端在运行")
+                    for server in running_servers:
+                        print(f"  • {server['name']} (端口{server['port']})")
             else:
-                print("\n没有需要停止的服务端")
+                print("取消停止操作")
         except Exception as e:
             print(f"❌ 停止过程中发生错误: {e}")
             

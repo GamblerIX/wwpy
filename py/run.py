@@ -85,6 +85,8 @@ class WuWaRun:
         # 控制标志
         self.shutdown_event = Event()
         self.monitor_thread = None
+        self.auto_restart_enabled = True  # 自动重启开关
+        self.stop_flag_file = self.project_root / "stop_flag.tmp"  # 停止标志文件
         
         # 注册信号处理器
         self._setup_signal_handlers()
@@ -191,12 +193,16 @@ class WuWaRun:
                 # 在Windows上不使用CREATE_NEW_PROCESS_GROUP，这样Ctrl+C信号可以传播到子进程
                 process = subprocess.Popen(
                     cmd,
-                    cwd=cwd
+                    cwd=cwd,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL
                 )
             else:  # Unix-like系统
                 process = subprocess.Popen(
                     cmd,
                     cwd=cwd,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
                     preexec_fn=os.setsid
                 )
             
@@ -368,35 +374,27 @@ class WuWaRun:
                         if process.poll() is not None:
                             # 进程已退出
                             return_code = process.returncode
+                            
+                            # 检查是否是通过stop.py停止的
+                            if self.stop_flag_file.exists():
+                                self.log_message(f"ℹ️  {server['name']} 通过stop.py正常停止 (退出码: {return_code})")
+                                server["process"] = None
+                                server["start_time"] = None
+                                continue
+                            
                             self.log_message(f"⚠️  {server['name']} 意外退出 (退出码: {return_code})", "WARNING")
                             
-                            # 重启服务端（最多重启3次）
-                            if server["restart_count"] < 3:
-                                server["restart_count"] += 1
-                                self.log_message(f"尝试重启 {server['name']} (第{server['restart_count']}次)")
+                            # 禁用自动重启功能（根据用户要求）
+                            self.log_message(f"ℹ️  自动重启已禁用，{server['name']} 不会自动重启")
+                            server["process"] = None
+                            server["start_time"] = None
                                 
-                                # 清理进程信息
-                                server["process"] = None
-                                server["start_time"] = None
-                                
-                                # 等待一段时间后重启
-                                time.sleep(5)
-                                
-                                if self.start_single_server(server_key):
-                                    self.log_message(f"✅ {server['name']} 重启成功")
-                                else:
-                                    self.log_message(f"❌ {server['name']} 重启失败", "ERROR")
-                            else:
-                                self.log_message(f"❌ {server['name']} 重启次数过多，停止重启", "ERROR")
-                                server["process"] = None
-                                server["start_time"] = None
-                                
-                # 每10秒检查一次
-                time.sleep(10)
+                # 每2秒检查一次（优化检查速度）
+                time.sleep(2)
                 
             except Exception as e:
                 self.log_message(f"监控线程发生错误: {e}", "ERROR")
-                time.sleep(10)
+                time.sleep(2)
                 
     def get_server_status(self):
         """获取服务端状态"""
