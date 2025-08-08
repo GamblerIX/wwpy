@@ -1,4 +1,4 @@
-# 鸣潮服务器一键运行工具
+# 鸣潮服务器一键运行工具（上游问题，构建不可用，详见已知问题）
 
 ## 项目介绍
 
@@ -6,7 +6,7 @@
 
 > 本项目采用MIT协议开源,您可以在遵守协议且仅为学习和研究使用的前提下自由使用、修改和分发本项目的代码，但是并不包括wicked-waifus-rs目录下的代码。
 
-> wicked-waifus-rs目录下的代码是第三方作者的代码，本作者不对其代码进行任何修改，也不承担因此产生的任何后果和责任。代码有误的情况下本作者会尝试修正代码，但是仍然不承担因此产生的任何后果和责任。使用本项目即视为您同意且理解。
+> wicked-waifus-rs目录下的代码是第三方作者的代码，本作者不对其代码进行任何修改，也不承担因此产生的任何后果和责任。使用本项目即视为您同意且理解。
 
 > 由于每台机子有不同的体质，不提供任何已构建的服务端文件，您需要运行脚本并构建服务端。
 
@@ -135,8 +135,36 @@ wwpy/
 - **一键运行脚本**: https://github.com/GamblerIX/wwpy
 - **服务端源码**: https://git.xeondev.com/wickedwaifus/wicked-waifus-rs
 
-> 在wicked-waifus-rs\wicked-waifus-hotpatch-server\src\main.rs第31行，路由路径定义为 "/:env:/client/:hash:/:platform:/config.json" ，这里使用了旧版本的路由语法（以冒号开头的路径参数）。新版本的axum路由器要求使用花括号格式,需要修复这个路由定义为 "/{env}/client/{hash}/{platform}/config.json"。
+## 已知问题
 
-> 2.5版本期间，如果您缺少时间，完整克隆本脚本项目即可，其中的源码已经修复完成。
+> 在wicked-waifus-rs\wicked-waifus-hotpatch-server\src\main.rs第31行，路由路径定义为 "/:env:/client/:hash:/:platform:/config.json" ，这里使用了旧版本的路由语法（以冒号开头的路径参数）。新版本的axum路由器要求使用花括号格式，需要修复这个路由定义为 "/{env}/client/{hash}/{platform}/config.json"。
+> 请您在git源码后手动修改源码中的路由配置。
 
-> 2.5版本之后，如果hotpatch-server仍然闪退，可能需要等待上游修复或您手动修改源码中的路由配置。
+> 上游问题，wicked-waifus-proto仓库自2025.8.8消失（2025.8.7仍然可用），静待上游修复。（本人没有备份相关文件）
+> 未修复前会出现以下报错：
+>     Updating git repository `https://git.xeondev.com/wickedwaifus/wicked-waifus-proto`
+> error: failed to get `wicked-waifus-protocol` as a dependency of package `wicked-waifus-gateway-server v0.1.0 (C:\Users\Administrator\Downloads\wicked-waifus-rs-main\wicked-waifus-gateway-server)`
+>
+> Caused by:
+>   failed to load source for dependency `wicked-waifus-protocol`
+>
+> Caused by:
+>   Unable to update https://git.xeondev.com/wickedwaifus/wicked-waifus-proto
+>
+> Caused by:
+>   failed to fetch into: C:\Users\Administrator\.cargo\git\db\wicked-waifus-proto-c02ed7b8a05f4123
+>
+> Caused by:
+>   failed to authenticate when downloading repository
+>
+>   * attempted to find username/password via git's `credential.helper` support, but failed
+>
+>   if the git CLI succeeds then `net.git-fetch-with-cli` may help here
+>   https://doc.rust-lang.org/cargo/reference/config.html#netgit-fetch-with-cli
+>
+> Caused by:
+>   failed to acquire username/password from local configuration
+> PS C:\Users\Administrator\Downloads\wicked-waifus-rs-main>
+
+
+
