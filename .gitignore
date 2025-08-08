@@ -21,3 +21,9 @@ Thumbs.db
 release/
 temp/
 logs/
+
+# Python cache
+py/__pycache__/
+
+# Trae IDE
+.trae/

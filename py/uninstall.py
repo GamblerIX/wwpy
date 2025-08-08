@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-鸣潮服务器卸载脚本
+鸣潮服务端卸载脚本
 
 功能：
-- 停止所有服务器进程
+- 停止所有服务端进程
 - 清理日志文件
 - 清理临时文件
 - 清理构建文件
@@ -22,19 +22,18 @@ from pathlib import Path
 from datetime import datetime
 
 class WuWaUninstall:
-    """鸣潮服务器卸载类"""
+    """鸣潮服务端卸载类"""
     
     def __init__(self, project_root):
         self.project_root = Path(project_root)
         self.logs_dir = self.project_root / "logs"
-        self.temp_dir = self.project_root / "temp"
         self.release_dir = self.project_root / "release"
         self.source_dir = self.project_root / "wicked-waifus-rs"
         
         # 确保目录存在
         self.logs_dir.mkdir(exist_ok=True)
         
-        # 服务器进程名称
+        # 服务端进程名称
         self.server_processes = [
             "wicked-waifus-config-server",
             "wicked-waifus-hotpatch-server", 
@@ -43,8 +42,8 @@ class WuWaUninstall:
             "wicked-waifus-game-server"
         ]
         
-        # 服务器端口
-        self.server_ports = [8888, 8889, 8890, 8891, 8892]
+        # 服务端端口
+        self.server_ports = [10001, 5500, 10003, 10004, 10002]
         
     def log_message(self, message, log_type="INFO"):
         """记录日志消息"""
@@ -60,7 +59,7 @@ class WuWaUninstall:
             f.write(log_entry + "\n")
             
     def find_server_processes(self):
-        """查找服务器进程"""
+        """查找服务端进程"""
         found_processes = []
         
         try:
@@ -70,7 +69,7 @@ class WuWaUninstall:
                     proc_name = proc_info['name'].lower()
                     cmdline = ' '.join(proc_info['cmdline']) if proc_info['cmdline'] else ''
                     
-                    # 检查是否是我们的服务器进程
+                    # 检查是否是我们的服务端进程
                     for server_name in self.server_processes:
                         if (server_name in proc_name or 
                             server_name in cmdline or
@@ -93,16 +92,16 @@ class WuWaUninstall:
         return found_processes
         
     def stop_all_servers(self, force=False):
-        """停止所有服务器进程"""
-        self.log_message("开始停止所有服务器进程...")
+        """停止所有服务端进程"""
+        self.log_message("开始停止所有服务端进程...")
         
         processes = self.find_server_processes()
         
         if not processes:
-            self.log_message("未发现运行中的服务器进程")
+            self.log_message("未发现运行中的服务端进程")
             return True
             
-        self.log_message(f"发现 {len(processes)} 个服务器进程")
+        self.log_message(f"发现 {len(processes)} 个服务端进程")
         
         stopped_count = 0
         failed_processes = []
@@ -162,7 +161,7 @@ class WuWaUninstall:
             return True
             
     def kill_port_processes(self):
-        """杀死占用服务器端口的进程"""
+        """杀死占用服务端端口的进程"""
         self.log_message("检查并清理端口占用...")
         
         killed_count = 0
@@ -250,43 +249,7 @@ class WuWaUninstall:
         except Exception as e:
             self.log_message(f"清理日志文件时发生错误: {e}", "ERROR")
             
-    def clean_temp_files(self):
-        """清理临时文件"""
-        self.log_message("开始清理临时文件...")
-        
-        cleaned_dirs = []
-        
-        # 清理temp目录
-        if self.temp_dir.exists():
-            try:
-                shutil.rmtree(self.temp_dir)
-                self.temp_dir.mkdir(exist_ok=True)
-                cleaned_dirs.append("temp")
-                self.log_message("清理了temp目录")
-            except Exception as e:
-                self.log_message(f"清理temp目录失败: {e}", "ERROR")
-                
-        # 清理release目录
-        if self.release_dir.exists():
-            try:
-                for item in self.release_dir.iterdir():
-                    if item.is_file():
-                        item.unlink()
-                    elif item.is_dir():
-                        shutil.rmtree(item)
-                cleaned_dirs.append("release")
-                self.log_message("清理了release目录")
-            except Exception as e:
-                self.log_message(f"清理release目录失败: {e}", "ERROR")
-                
-        # 清理源码目录中的构建文件
-        if self.source_dir.exists():
-            self._clean_rust_build_files()
-            
-        if cleaned_dirs:
-            self.log_message(f"清理了 {len(cleaned_dirs)} 个目录: {', '.join(cleaned_dirs)}")
-        else:
-            self.log_message("没有需要清理的临时文件")
+    # clean_temp_files方法已移除
             
     def _clean_rust_build_files(self):
         """清理Rust构建文件"""
@@ -308,7 +271,7 @@ class WuWaUninstall:
                 except Exception as e:
                     self.log_message(f"清理构建文件失败: {item_name} - {e}", "ERROR")
                     
-        # 清理各个服务器目录中的target目录
+        # 清理各个服务端目录中的target目录
         server_dirs = [
             "wicked-waifus-config-server",
             "wicked-waifus-hotpatch-server",
@@ -398,13 +361,13 @@ class WuWaUninstall:
         
         # 检查进程状态
         processes = self.find_server_processes()
-        print(f"\n🔍 服务器进程状态:")
+        print(f"\n🔍 服务端进程状态:")
         if processes:
             print(f"  ⚠️  仍有 {len(processes)} 个进程在运行:")
             for proc in processes:
                 print(f"    - {proc['server_name']} (PID: {proc['pid']})")
         else:
-            print("  ✅ 所有服务器进程已停止")
+            print("  ✅ 所有服务端进程已停止")
             
         # 检查目录状态
         print(f"\n📁 目录状态:")
@@ -440,12 +403,12 @@ class WuWaUninstall:
     def interactive_uninstall(self):
         """交互式卸载"""
         print("\n" + "=" * 80)
-        print("                        鸣潮服务器卸载向导")
+        print("                        鸣潮服务端卸载向导")
         print("=" * 80)
         
-        print("\n⚠️  警告: 此操作将清理服务器相关文件和进程")
+        print("\n⚠️  警告: 此操作将清理服务端相关文件和进程")
         print("请选择要执行的操作:")
-        print("\n1. 停止服务器进程")
+        print("\n1. 停止服务端进程")
         print("2. 清理日志文件")
         print("3. 清理临时文件")
         print("4. 清理构建文件")
@@ -469,9 +432,7 @@ class WuWaUninstall:
                     if confirm == 'y':
                         self.clean_logs()
                 elif choice == "3":
-                    confirm = input("确认清理临时文件? (y/N): ").strip().lower()
-                    if confirm == 'y':
-                        self.clean_temp_files()
+                    print("临时文件清理功能已移除")
                 elif choice == "4":
                     confirm = input("确认清理构建文件? (y/N): ").strip().lower()
                     if confirm == 'y':
@@ -483,7 +444,7 @@ class WuWaUninstall:
                     self.backup_data(backup_path)
                 elif choice == "6":
                     print("\n⚠️  完全卸载将执行以下操作:")
-                    print("  - 停止所有服务器进程")
+                    print("  - 停止所有服务端进程")
                     print("  - 清理端口占用")
                     print("  - 清理日志文件")
                     print("  - 清理临时文件")
@@ -500,7 +461,6 @@ class WuWaUninstall:
                         self.stop_all_servers(force=True)
                         self.kill_port_processes()
                         self.clean_logs()
-                        self.clean_temp_files()
                         
                         print("\n✅ 完全卸载完成")
                         self.show_cleanup_summary()
@@ -531,7 +491,6 @@ class WuWaUninstall:
             
             # 清理文件
             self.clean_logs()
-            self.clean_temp_files()
             
             self.log_message("快速卸载完成")
             return True
@@ -550,12 +509,11 @@ def main():
             # 快速卸载
             uninstaller.quick_uninstall()
         elif sys.argv[1] == "--stop":
-            # 仅停止服务器
+            # 仅停止服务端
             uninstaller.stop_all_servers()
         elif sys.argv[1] == "--clean":
             # 仅清理文件
             uninstaller.clean_logs()
-            uninstaller.clean_temp_files()
         else:
             print("用法: python uninstall.py [--quick|--stop|--clean]")
     else:

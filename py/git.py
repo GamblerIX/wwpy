@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-鸣潮服务器源码下载脚本
+鸣潮服务端源码下载脚本
 
 功能：
 - 从Git仓库克隆源码
@@ -21,17 +21,15 @@ from pathlib import Path
 from datetime import datetime
 
 class WuWaGit:
-    """鸣潮服务器源码下载类"""
+    """鸣潮服务端源码下载类"""
     
     def __init__(self, project_root):
         self.project_root = Path(project_root)
         self.wicked_waifus_path = self.project_root / "wicked-waifus-rs"
         self.logs_dir = self.project_root / "logs"
-        self.temp_dir = self.project_root / "temp"
         
         # 确保目录存在
         self.logs_dir.mkdir(exist_ok=True)
-        self.temp_dir.mkdir(exist_ok=True)
         
         # Git仓库配置
         self.git_url = "https://git.xeondev.com/wickedwaifus/wicked-waifus-rs.git"
@@ -73,13 +71,13 @@ class WuWaGit:
         self.log_message("检查网络连接...")
         
         try:
-            # 测试连接到Git服务器
+            # 测试连接到Git服务端
             response = requests.get("https://git.xeondev.com", timeout=10)
             if response.status_code == 200:
                 self.log_message("✅ 网络连接正常")
                 return True
             else:
-                self.log_message(f"⚠️  Git服务器响应异常: {response.status_code}", "WARNING")
+                self.log_message(f"⚠️  Git服务端响应异常: {response.status_code}", "WARNING")
                 return True  # 仍然尝试克隆
         except requests.RequestException as e:
             self.log_message(f"⚠️  网络连接检查失败: {e}", "WARNING")

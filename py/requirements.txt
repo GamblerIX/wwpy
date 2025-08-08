@@ -1,4 +1,4 @@
-# 鸣潮服务器部署工具 Python 依赖
+# 鸣潮服务端部署工具 Python 依赖
 # Wuthering Waves Server Deployment Tool Python Dependencies
 
 # 系统进程和资源监控

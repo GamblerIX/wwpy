@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-鸣潮服务器日志管理脚本
+鸣潮服务端日志管理脚本
 
 功能：
 - 日志文件查看和分析
@@ -23,7 +23,7 @@ from threading import Thread, Event
 from collections import defaultdict, Counter
 
 class WuWaLogs:
-    """鸣潮服务器日志管理类"""
+    """鸣潮服务端日志管理类"""
     
     def __init__(self, project_root):
         self.project_root = Path(project_root)
@@ -103,7 +103,7 @@ class WuWaLogs:
     def show_log_files_list(self):
         """显示日志文件列表"""
         print("\n" + "=" * 80)
-        print("                        鸣潮服务器日志文件")
+        print("                        鸣潮服务端日志文件")
         print("=" * 80)
         
         files_info = self.get_log_files_info()

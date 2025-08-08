@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-鸣潮服务器状态监控脚本
+鸣潮服务端状态监控脚本
 
 功能：
-- 检查服务器运行状态
+- 检查服务端运行状态
 - 端口占用检查
 - 系统资源监控
 - 进程健康检查
@@ -21,7 +21,7 @@ from datetime import datetime, timedelta
 from threading import Thread, Event
 
 class WuWaStatus:
-    """鸣潮服务器状态监控类"""
+    """鸣潮服务端状态监控类"""
     
     def __init__(self, project_root):
         self.project_root = Path(project_root)
@@ -30,32 +30,32 @@ class WuWaStatus:
         # 确保目录存在
         self.logs_dir.mkdir(exist_ok=True)
         
-        # 服务器配置
+        # 服务端配置
         self.servers = {
             "config-server": {
                 "name": "wicked-waifus-config-server",
-                "port": 8888,
-                "description": "配置服务器"
+                "port": 10001,
+                "description": "配置服务端"
             },
             "hotpatch-server": {
                 "name": "wicked-waifus-hotpatch-server",
-                "port": 8892,
-                "description": "热更新服务器"
+                "port": 10002,
+                "description": "热更新服务端"
             },
             "login-server": {
                 "name": "wicked-waifus-login-server",
-                "port": 8889,
-                "description": "登录服务器"
+                "port": 5500,
+                "description": "登录服务端"
             },
             "gateway-server": {
                 "name": "wicked-waifus-gateway-server",
-                "port": 8890,
-                "description": "网关服务器"
+                "port": 10003,
+                "description": "网关服务端"
             },
             "game-server": {
                 "name": "wicked-waifus-game-server",
-                "port": 8891,
-                "description": "游戏服务器"
+                "port": 10004,
+                "description": "游戏服务端"
             }
         }
         
@@ -91,7 +91,7 @@ class WuWaStatus:
             # 如果无法获取网络连接信息，尝试socket连接
             try:
                 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                    s.settimeout(1)
+                    s.settimeout(0.5)  # 减少超时时间从1秒到0.5秒
                     result = s.connect_ex(('127.0.0.1', port))
                     if result == 0:
                         return {
@@ -108,34 +108,85 @@ class WuWaStatus:
             "address": None
         }
         
+    def get_all_port_status(self):
+        """批量获取所有端口状态，减少重复的网络连接检查"""
+        port_status = {}
+        
+        try:
+            # 一次性获取所有网络连接，避免重复调用
+            connections = psutil.net_connections()
+            listening_ports = {}
+            
+            for conn in connections:
+                if conn.status == psutil.CONN_LISTEN:
+                    listening_ports[conn.laddr.port] = {
+                        "listening": True,
+                        "pid": conn.pid,
+                        "address": f"{conn.laddr.ip}:{conn.laddr.port}"
+                    }
+            
+            # 检查我们关心的端口
+            for server_key, server in self.servers.items():
+                port = server['port']
+                if port in listening_ports:
+                    port_status[port] = listening_ports[port]
+                else:
+                    port_status[port] = {
+                        "listening": False,
+                        "pid": None,
+                        "address": None
+                    }
+                    
+        except (psutil.AccessDenied, AttributeError):
+            # 如果无法获取网络连接信息，回退到逐个检查
+            for server_key, server in self.servers.items():
+                port = server['port']
+                port_status[port] = self.check_port_status(port)
+                
+        return port_status
+        
     def find_server_processes(self):
-        """查找服务器进程"""
+        """查找服务端进程"""
         processes = {}
         
         try:
-            for proc in psutil.process_iter(['pid', 'name', 'cmdline', 'create_time', 'cpu_percent', 'memory_info']):
+            # 预编译服务端名称列表，减少重复计算
+            server_names = {}
+            for server_key, server in self.servers.items():
+                server_names[server_key] = {
+                    'name': server['name'],
+                    'name_lower': server['name'].lower(),
+                    'name_underscore': server['name'].replace('-', '_')
+                }
+            
+            # 只获取必要的进程信息，减少系统调用
+            for proc in psutil.process_iter(['pid', 'name', 'cmdline', 'create_time']):
                 try:
                     proc_info = proc.info
                     proc_name = proc_info['name'].lower()
+                    
+                    # 快速过滤：只检查包含'wicked'的进程
+                    if 'wicked' not in proc_name:
+                        continue
+                        
                     cmdline = ' '.join(proc_info['cmdline']) if proc_info['cmdline'] else ''
                     
-                    # 检查是否是我们的服务器进程
-                    for server_key, server in self.servers.items():
-                        server_name = server['name']
-                        
-                        if (server_name in proc_name or 
-                            server_name in cmdline or
-                            (proc_name.endswith('.exe') and server_name.replace('-', '_') in proc_name)):
+                    # 检查是否是我们的服务端进程
+                    for server_key, names in server_names.items():
+                        if (names['name_lower'] in proc_name or 
+                            names['name'] in cmdline or
+                            (proc_name.endswith('.exe') and names['name_underscore'] in proc_name)):
                             
                             # 获取进程详细信息
                             create_time = datetime.fromtimestamp(proc_info['create_time'])
                             uptime = datetime.now() - create_time
                             
-                            # 获取CPU和内存使用率
+                            # 延迟获取CPU和内存信息，只在需要时获取
                             try:
-                                cpu_percent = proc.cpu_percent()
-                                memory_info = proc_info['memory_info']
+                                memory_info = proc.memory_info()
                                 memory_mb = memory_info.rss / 1024 / 1024
+                                # 使用interval=None获取即时CPU使用率，避免阻塞
+                                cpu_percent = proc.cpu_percent()
                             except (psutil.NoSuchProcess, psutil.AccessDenied):
                                 cpu_percent = 0
                                 memory_mb = 0
@@ -163,8 +214,8 @@ class WuWaStatus:
     def get_system_info(self):
         """获取系统信息"""
         try:
-            # CPU信息
-            cpu_percent = psutil.cpu_percent(interval=1)
+            # CPU信息 - 使用即时检查，避免1秒等待
+            cpu_percent = psutil.cpu_percent(interval=None)
             cpu_count = psutil.cpu_count()
             
             # 内存信息
@@ -223,7 +274,7 @@ class WuWaStatus:
     def show_status(self, detailed=True):
         """显示服务器状态"""
         print("\n" + "=" * 80)
-        print("                        鸣潮服务器状态监控")
+        print("                        鸣潮服务端状态监控")
         print("=" * 80)
         
         # 获取当前时间
@@ -233,8 +284,11 @@ class WuWaStatus:
         # 获取进程信息
         processes = self.find_server_processes()
         
-        # 显示服务器状态
-        print("\n📊 服务器状态:")
+        # 批量获取所有端口状态，提高效率
+        all_port_status = self.get_all_port_status()
+        
+        # 显示服务端状态
+        print("\n📊 服务端状态:")
         print("-" * 80)
         
         running_count = 0
@@ -242,8 +296,8 @@ class WuWaStatus:
             port = server['port']
             description = server['description']
             
-            # 检查端口状态
-            port_status = self.check_port_status(port)
+            # 获取端口状态
+            port_status = all_port_status.get(port, {"listening": False, "pid": None, "address": None})
             
             # 检查进程状态
             if server_key in processes:
@@ -272,7 +326,7 @@ class WuWaStatus:
                 else:
                     print(f"{description:15} | 端口 {port:4} | {status} | {'':12} | {'':10}")
                     
-        print(f"\n📈 总计: {running_count}/{len(self.servers)} 个服务器正在运行")
+        print(f"\n📈 总计: {running_count}/{len(self.servers)} 个服务端正在运行")
         
         # 显示系统信息
         if detailed:
@@ -348,7 +402,7 @@ class WuWaStatus:
         self.monitor_event.set()
         
     def check_server_health(self):
-        """检查服务器健康状态"""
+        """检查服务端健康状态"""
         health_report = {
             "timestamp": datetime.now(),
             "servers": {},
@@ -356,7 +410,7 @@ class WuWaStatus:
             "issues": []
         }
         
-        # 检查服务器进程
+        # 检查服务端进程
         processes = self.find_server_processes()
         
         for server_key, server in self.servers.items():
@@ -416,12 +470,12 @@ class WuWaStatus:
         report_file = self.logs_dir / f"status_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
         
         with open(report_file, "w", encoding="utf-8") as f:
-            f.write("鸣潮服务器状态报告\n")
+            f.write("鸣潮服务端状态报告\n")
             f.write("=" * 50 + "\n")
             f.write(f"生成时间: {report['timestamp'].strftime('%Y-%m-%d %H:%M:%S')}\n\n")
             
-            # 服务器状态
-            f.write("服务器状态:\n")
+            # 服务端状态
+            f.write("服务端状态:\n")
             f.write("-" * 30 + "\n")
             for server_key, status in report['servers'].items():
                 server_name = self.servers[server_key]['name']
@@ -457,7 +511,7 @@ def main():
     project_root = Path(__file__).parent.parent
     status_checker = WuWaStatus(project_root)
     
-    print("服务器状态检查测试...")
+    print("服务端状态检查测试...")
     
     # 显示状态
     status_checker.show_status()

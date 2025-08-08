@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-鸣潮服务器构建脚本
+鸣潮服务端构建脚本
 
 功能：
 - 环境检查（Rust、Protoc、PgSQL）
@@ -21,21 +21,19 @@ from pathlib import Path
 from datetime import datetime
 
 class WuWaBuild:
-    """鸣潮服务器构建类"""
+    """鸣潮服务端构建类"""
     
     def __init__(self, project_root):
         self.project_root = Path(project_root)
         self.wicked_waifus_path = self.project_root / "wicked-waifus-rs"
         self.logs_dir = self.project_root / "logs"
         self.release_dir = self.project_root / "release"
-        self.temp_dir = self.project_root / "temp"
         
         # 确保目录存在
         self.logs_dir.mkdir(exist_ok=True)
         self.release_dir.mkdir(exist_ok=True)
-        self.temp_dir.mkdir(exist_ok=True)
         
-        # 服务器列表
+        # 服务端列表
         self.servers = [
             "wicked-waifus-config-server",
             "wicked-waifus-hotpatch-server", 
@@ -249,17 +247,25 @@ class WuWaBuild:
         """检查所有环境要求"""
         self.log_message("=== 开始环境检查 ===")
         
-        checks = [
-            self.check_rust_environment,
+        # 使用新的环境检查器进行构建时检查
+        from check import WuWaEnvironmentChecker
+        env_checker = WuWaEnvironmentChecker(self.project_root)
+        
+        # 执行构建时环境检查
+        if not env_checker.check_for_build():
+            self.log_message("❌ 构建环境检查失败", "ERROR")
+            return False
+        
+        # 执行额外的构建特定检查
+        additional_checks = [
             self.check_protoc_environment,
             self.check_postgresql_environment,
             self.check_git_environment,
-            self.check_system_resources,
-            self.check_source_code
+            self.check_system_resources
         ]
         
         all_passed = True
-        for check in checks:
+        for check in additional_checks:
             if not check():
                 all_passed = False
                 
@@ -272,7 +278,7 @@ class WuWaBuild:
         return all_passed
         
     def build_single_server(self, server_name, retry_count=3):
-        """构建单个服务器"""
+        """构建单个服务端"""
         self.log_message(f"开始构建 {server_name}...")
         
         for attempt in range(retry_count):
@@ -336,8 +342,8 @@ class WuWaBuild:
         return False
         
     def build_servers(self):
-        """构建所有服务器"""
-        self.log_message("=== 开始构建服务器 ===")
+        """构建所有服务端"""
+        self.log_message("=== 开始构建服务端 ===")
         
         # 环境检查
         if not self.check_all_requirements():
@@ -346,7 +352,7 @@ class WuWaBuild:
         # 记录开始时间
         start_time = time.time()
         
-        # 构建所有服务器
+        # 构建所有服务端
         success_count = 0
         for server in self.servers:
             if self.build_single_server(server):
@@ -360,7 +366,7 @@ class WuWaBuild:
         build_time = end_time - start_time
         
         if success_count == len(self.servers):
-            self.log_message(f"✅ 所有服务器构建完成 ({success_count}/{len(self.servers)})")
+            self.log_message(f"✅ 所有服务端构建完成 ({success_count}/{len(self.servers)})")
             self.log_message(f"✅ 总构建时间: {build_time:.1f}秒")
             self.log_message("=== 构建完成 ===")
             return True
