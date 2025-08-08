@@ -362,6 +362,10 @@ class WuWaBuild:
         if success_count == len(self.servers):
             self.log_message(f"✅ 所有服务器构建完成 ({success_count}/{len(self.servers)})")
             self.log_message(f"✅ 总构建时间: {build_time:.1f}秒")
+            
+            # 清理编译临时文件
+            self.clean_build_temp_files()
+            
             self.log_message("=== 构建完成 ===")
             return True
         else:
@@ -369,6 +373,25 @@ class WuWaBuild:
             self.log_message(f"❌ 构建时间: {build_time:.1f}秒")
             self.log_message("=== 构建失败 ===")
             return False
+            
+    def clean_build_temp_files(self):
+        """清理编译临时文件（保留release目录中的可执行文件）"""
+        self.log_message("清理编译临时文件...")
+        
+        try:
+            # 清理target目录
+            target_dir = self.wicked_waifus_path / "target"
+            if target_dir.exists():
+                shutil.rmtree(target_dir)
+                self.log_message("✅ target目录已清理")
+            else:
+                self.log_message("ℹ️  target目录不存在，无需清理")
+                
+            return True
+        except Exception as e:
+            self.log_message(f"⚠️  清理临时文件失败: {e}", "WARNING")
+            # 清理失败不应该影响构建结果
+            return True
             
     def clean_build(self):
         """清理构建文件"""
