@@ -26,7 +26,7 @@ try:
     from build import WuWaBuild
     from run import WuWaRun
     from status import WuWaStatus
-    from uninstall import WuWaUninstall
+    from uninstall import WuWaUninstaller
     from git import WuWaGit
     from stop import WuWaStop
     from check import WuWaEnvironmentChecker
@@ -51,7 +51,7 @@ class WuWaManager:
         self.builder = WuWaBuild(self.project_root)
         self.runner = WuWaRun(self.project_root)
         self.status_checker = WuWaStatus(self.project_root)
-        self.uninstaller = WuWaUninstall(self.project_root)
+        self.uninstaller = WuWaUninstaller(self.project_root)
         self.git_manager = WuWaGit(self.project_root)
         self.stopper = WuWaStop(self.project_root)
         self.env_checker = WuWaEnvironmentChecker(self.project_root)
