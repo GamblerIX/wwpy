@@ -1,7 +1,5 @@
 # 鸣潮服务端一键运行工具
 
-> 上游问题，构建不可用，发行版运行暂时正常，详见已知问题。
-
 > 发行版调试运行有杂乱输出是正常的，不影响运行。
 
 ## 项目介绍
@@ -131,32 +129,6 @@ db_name = "users"
 
 > 在wicked-waifus-rs\wicked-waifus-hotpatch-server\src\main.rs第31行，路由路径定义为 "/:env:/client/:hash:/:platform:/config.json" ，这里使用了旧版本的路由语法（以冒号开头的路径参数）。新版本的axum路由器要求使用花括号格式，需要修复这个路由定义为 "/{env}/client/{hash}/{platform}/config.json"。
 > 请您在git源码后手动修改源码中的路由配置。
-
-> 上游问题，wicked-waifus-proto仓库自2025.8.8消失或私有化（2025.8.7仍然可用），静待上游修复。（本作者没有备份相关源码文件）
-> Docker构建同理
-> 未修复前会出现以下报错：
->     Updating git repository `https://git.xeondev.com/wickedwaifus/wicked-waifus-proto`
-> error: failed to get `wicked-waifus-protocol` as a dependency of package `wicked-waifus-gateway-server v0.1.0 (C:\Users\Administrator\Downloads\wicked-waifus-rs-main\wicked-waifus-gateway-server)`
->
-> Caused by:
->   failed to load source for dependency `wicked-waifus-protocol`
->
-> Caused by:
->   Unable to update https://git.xeondev.com/wickedwaifus/wicked-waifus-proto
->
-> Caused by:
->   failed to fetch into: C:\Users\Administrator\.cargo\git\db\wicked-waifus-proto-c02ed7b8a05f4123
->
-> Caused by:
->   failed to authenticate when downloading repository
->
->   * attempted to find username/password via git's `credential.helper` support, but failed
->
->   if the git CLI succeeds then `net.git-fetch-with-cli` may help here
->   https://doc.rust-lang.org/cargo/reference/config.html#netgit-fetch-with-cli
->
-> Caused by:
->   failed to acquire username/password from local configuration
 
 ## 🔗 项目地址
 
