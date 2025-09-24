@@ -4,18 +4,11 @@
 
 ## 项目介绍
 
-这是一个用于一键构建，运行和管理wicked-waifus-rs服务端的Python项目,仅供学习和研究使用。
-
-> 重要！由于不可抗力因素，中国大陆的用户加速器需要全程打开。
-
-> 环境配置教程详见wwpy/docs目录下的环境配置完整指南.md。
-
-> 如果您是技术新手，请参阅wwpy/docs目录下的小白完整使用指南.md。该指南细致地拆分了所有操作，包括环境配置和运行。
+这是一个用于一键构建wicked-waifus-rs服务端的Python项目,仅供学习和研究使用。
 
 ## 一键运行脚本
 
 > 请确保您已经正确安装了Python、Rust、Protoc和PostgreSQL！
-> 请确保您已经正确配置了数据库！(见下方介绍)
 
 ```
 git clone https://github.com/GamblerIX/wwpy.git
